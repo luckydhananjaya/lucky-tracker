@@ -18,9 +18,9 @@
             <p class="text-gray-400 text-xs font-bold uppercase mb-6">Sessions Left</p>
             
             <div class="space-y-3">
-                <input id="userName" type="text" placeholder="Your Name (Optional)" class="w-full border-2 border-gray-100 p-4 rounded-2xl text-center outline-none focus:border-blue-500 bg-gray-50 transition-all">
+                <input id="userName" type="text" placeholder="Your Name (Optional)" class="w-full border-2 border-gray-100 p-4 rounded-2xl text-center outline-none focus:border-blue-500 bg-gray-50 transition-all text-gray-900">
                 
-                <input id="userEmail" type="email" placeholder="Your Email" class="w-full border-2 border-gray-100 p-4 rounded-2xl text-center outline-none focus:border-blue-500 bg-gray-50 transition-all">
+                <input id="userEmail" type="email" placeholder="Your Email" class="w-full border-2 border-gray-100 p-4 rounded-2xl text-center outline-none focus:border-blue-500 bg-gray-50 transition-all text-gray-900">
             </div>
             
             <button onclick="fetchBalance()" class="mt-4 text-blue-500 font-bold text-sm hover:underline py-2">Check My Status</button>
@@ -52,41 +52,42 @@
 
             if (!emailInput) return alert("Please enter your email!");
 
-            // A. If they typed a name, update it in the database first
-            if (nameInput) {
-                await _supabase
-                    .from('client_profiles')
-                    .update({ client_name: nameInput })
-                    .eq('email', emailInput);
-            }
-
-            // B. Fetch their profile
+            // STEP A: Check if they exist in YOUR list first
             const { data, error } = await _supabase
                 .from('client_profiles')
                 .select('client_name, total_sessions, sessions_used')
                 .eq('email', emailInput)
                 .single();
 
-            if (error) {
-                alert("Account not found. Ask Lucky to add your email first!");
-                console.error(error);
+            // If error or no data, they are NOT registered
+            if (error || !data) {
+                alert("Account not found! You must register with Lucky first.");
                 return;
             }
 
-            if (data) {
-                // Update the display
-                const remaining = data.total_sessions - data.sessions_used;
-                document.getElementById('balance').innerText = remaining;
+            // STEP B: If they exist, AND they typed a new name, update it now
+            if (nameInput && nameInput !== data.client_name) {
+                await _supabase
+                    .from('client_profiles')
+                    .update({ client_name: nameInput })
+                    .eq('email', emailInput);
                 
-                // Show their name (either from DB or what they just typed)
+                // Update the welcome message immediately
+                document.getElementById('clientGreeting').innerText = `Welcome, ${nameInput}`;
+            } else {
+                // Use the name from database
                 const displayName = data.client_name || nameInput || "Client";
                 document.getElementById('clientGreeting').innerText = `Welcome, ${displayName}`;
                 
-                // If they didn't type a name but one exists, fill the box
+                // Fill the name box if it was empty
                 if (!nameInput && data.client_name) {
                     document.getElementById('userName').value = data.client_name;
                 }
             }
+
+            // STEP C: Show Balance
+            const remaining = data.total_sessions - data.sessions_used;
+            document.getElementById('balance').innerText = remaining;
         }
 
         // 3. SCANNER LOGIC
