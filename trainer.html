@@ -99,7 +99,7 @@
         let activeClientEmail = null;
 
         function checkPin() {
-            if (document.getElementById('pinInput').value === '1234') {
+            if (document.getElementById('pinInput').value === '7850') {
                 showSection('hub-view');
                 new QRCode(document.getElementById("qrcode"), { text: "Lucky_session_Tracker", width: 250, height: 250 });
             } else { alert("Incorrect PIN"); }
