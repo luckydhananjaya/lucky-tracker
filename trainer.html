@@ -28,41 +28,35 @@
         </div>
     </div>
 
-    <script>
-        // 1. SETUP SUPABASE (Replace with your keys!)
-        const supabaseUrl = 'https://umgeykseoqfwrkuttnxm.supabase.co';
-        const supabaseKey = 'sb_publishable_3Yr5BSfr4uHi7X8DfHmNSQ_uQPD-ofH';
-        const { createClient } = supabase;
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+   <script>
+    // 1. SETUP CONNECTION
+    const supabaseUrl = 'https://umgeykseoqfwrkuttnxm.supabase.co'; // Your URL
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZ2V5a3Nlb3Fmd3JrdXR0bnhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NDI3NTYsImV4cCI6MjA4NTUxODc1Nn0.vUDnlgdARv7v0wq98qS1dXTbPKtXfCy0EZy7wfP3hCk'; // Your Key
+    const { createClient } = supabase;
+    const _supabase = createClient(supabaseUrl, supabaseKey);
 
-        // 2. GENERATE QR
-        new QRCode(document.getElementById("qrcode"), "Lucky_session_Tracker");
+    async function addSessions() {
+        const email = document.getElementById('clientEmail').value.toLowerCase().trim();
+        const amount = parseInt(document.getElementById('amount').value);
 
-        // 3. ADD SESSIONS LOGIC
-        async function addSessions() {
-            const email = document.getElementById('clientEmail').value.toLowerCase();
-            const amount = parseInt(document.getElementById('amount').value);
+        if (!email || !amount) return alert("Please fill both fields");
 
-            if (!email || !amount) return alert("Please fill both fields");
+        // Check if client already exists in your new table
+        const { data: client } = await _supabase.from('client_profiles').select('*').eq('email', email).single();
 
-            // Check if client exists
-            const { data: client } = await supabase.from('client_profiles').select('*').eq('email', email).single();
-
-            if (client) {
-                const { error } = await supabase.from('client_profiles')
-                    .update({ total_sessions: client.total_sessions + amount })
-                    .eq('email', email);
-                if (!error) alert("Package Added Successfully!");
-            } else {
-                // If new client, create them
-                const { error } = await supabase.from('client_profiles')
-                    .insert([{ email, total_sessions: amount, sessions_used: 0 }]);
-                if (!error) alert("New Client Created & Package Added!");
-            }
+        if (client) {
+            // Update existing client
+            const { error } = await _supabase.from('client_profiles')
+                .update({ total_sessions: client.total_sessions + amount })
+                .eq('email', email);
+            if (!error) alert("Package Updated!");
+        } else {
+            // Create new client row
+            const { error } = await _supabase.from('client_profiles')
+                .insert([{ email: email, total_sessions: amount, sessions_used: 0 }]);
+            if (!error) alert("New Client Created!");
         }
-
-        // 4. PWA REGISTER
-        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }
-    </script>
+    }
+</script>
 </body>
 </html>
