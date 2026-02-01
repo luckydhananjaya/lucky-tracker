@@ -11,9 +11,10 @@
 <body class="bg-[#0f172a] text-white min-h-screen font-sans">
 
     <div id="pin-overlay" class="fixed inset-0 bg-gray-900 z-50 flex flex-col items-center justify-center p-6">
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-black text-blue-500 italic uppercase">Lucky's</h1>
-            <p class="text-gray-400 text-xs tracking-[0.3em] uppercase">Clients Tracker</p>
+        <div class="text-center mb-8 flex flex-col items-center">
+            <img src="/icon.png" alt="Logo" class="w-24 h-24 mb-4 rounded-2xl shadow-[0_0_30px_rgba(59,130,246,0.5)]">
+            <h1 class="text-2xl font-black text-white italic uppercase">BLUEPRINT</h1>
+            <p class="text-gray-500 text-[10px] tracking-[0.3em] uppercase">Admin Hub</p>
         </div>
         <input id="pinInput" type="password" maxlength="4" placeholder="PIN" class="bg-gray-800 border-2 border-blue-500/50 focus:border-blue-500 p-4 rounded-2xl text-center text-3xl w-48 mb-6 outline-none transition-all">
         <button onclick="checkPin()" class="bg-blue-600 hover:bg-blue-500 w-48 py-4 rounded-2xl font-bold text-lg shadow-[0_0_20px_rgba(37,99,235,0.3)] transition-all">UNLOCK</button>
@@ -24,39 +25,26 @@
             <h2 class="text-2xl font-bold">Trainer Dashboard</h2>
             <p class="text-gray-500 text-sm">Select an Action</p>
         </div>
-
         <button onclick="showSection('qr-view')" class="w-full max-w-sm bg-gradient-to-br from-blue-600 to-blue-800 p-8 rounded-[2rem] shadow-2xl active:scale-95 transition-all text-left relative overflow-hidden group">
-            <div class="absolute right-[-20px] bottom-[-20px] text-blue-500/30">
-                <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M3 3h8v8H3zm2 2v4h4V5zm8-2h8v8h-8zm2 2v4h4V5zM3 13h8v8H3zm2 2v4h4v-4zm8-2h8v8h-8zm2 2v4h4v-4z"/></svg>
-            </div>
             <h3 class="text-2xl font-black italic uppercase relative z-10">Show QR Code</h3>
             <p class="text-blue-200 text-sm relative z-10 mt-1">For clients to scan</p>
         </button>
-
         <button onclick="showSection('manager-view')" class="w-full max-w-sm bg-gray-800 border border-gray-700 p-8 rounded-[2rem] shadow-xl active:scale-95 transition-all text-left relative overflow-hidden">
             <h3 class="text-2xl font-black italic uppercase text-gray-200">Manage Clients</h3>
-            <p class="text-gray-500 text-sm mt-1">Add sessions, Edit, Reset</p>
+            <p class="text-gray-500 text-sm mt-1">Add sessions, Expiry, Reset</p>
         </button>
     </div>
 
     <div id="qr-view" class="hidden min-h-screen flex flex-col items-center justify-center p-6">
-        <button onclick="showSection('hub-view')" class="absolute top-6 left-6 text-gray-400 hover:text-white flex items-center font-bold">
-            ← Back
-        </button>
-        
+        <button onclick="showSection('hub-view')" class="absolute top-6 left-6 text-gray-400 hover:text-white flex items-center font-bold">← Back</button>
         <h2 class="text-3xl font-black text-blue-500 mb-8 italic">SCAN ME</h2>
-        
         <div class="bg-white p-6 rounded-[2.5rem] shadow-[0_0_60px_rgba(59,130,246,0.4)]">
             <div id="qrcode"></div>
         </div>
-        
-        <p class="mt-8 text-gray-500 text-sm text-center">Ask client to open their app<br>and scan this code.</p>
     </div>
 
     <div id="manager-view" class="hidden min-h-screen flex flex-col items-center pt-20 p-6">
-        <button onclick="showSection('hub-view')" class="absolute top-6 left-6 text-gray-400 hover:text-white flex items-center font-bold">
-            ← Back
-        </button>
+        <button onclick="showSection('hub-view')" class="absolute top-6 left-6 text-gray-400 hover:text-white flex items-center font-bold">← Back</button>
 
         <h2 class="text-2xl font-bold mb-6">Client Manager</h2>
 
@@ -80,15 +68,22 @@
             <div class="space-y-4">
                 <div>
                     <label class="text-xs text-gray-500 ml-2">Client Name</label>
-                    <input id="newName" type="text" class="w-full bg-gray-900 p-3 rounded-xl border border-gray-700 outline-none focus:border-blue-500">
+                    <input id="newName" type="text" class="w-full bg-gray-900 p-3 rounded-xl border border-gray-700 outline-none focus:border-blue-500 text-white">
                 </div>
-                <div>
-                    <label class="text-xs text-gray-500 ml-2">Total Sessions Purchased</label>
-                    <input id="newTotal" type="number" class="w-full bg-gray-900 p-3 rounded-xl border border-gray-700 outline-none focus:border-blue-500">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs text-gray-500 ml-2">Total Sessions</label>
+                        <input id="newTotal" type="number" class="w-full bg-gray-900 p-3 rounded-xl border border-gray-700 outline-none focus:border-blue-500 text-white">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 ml-2">Expiry Date</label>
+                        <input id="newExpiry" type="date" class="w-full bg-gray-900 p-3 rounded-xl border border-gray-700 outline-none focus:border-blue-500 text-white [color-scheme:dark]">
+                    </div>
                 </div>
 
                 <button onclick="saveClient()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold shadow-lg mt-2">
-                    SAVE CHANGES / ADD SESSIONS
+                    SAVE CHANGES
                 </button>
                 
                 <button onclick="resetUsage()" class="w-full border border-red-500/50 text-red-400 hover:bg-red-500/10 py-3 rounded-xl font-bold text-sm">
@@ -99,101 +94,66 @@
     </div>
 
     <script>
-        // --- 1. CONFIGURATION ---
         const supabaseUrl = 'https://umgeykseoqfwrkuttnxm.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZ2V5a3Nlb3Fmd3JrdXR0bnhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NDI3NTYsImV4cCI6MjA4NTUxODc1Nn0.vUDnlgdARv7v0wq98qS1dXTbPKtXfCy0EZy7wfP3hCk'; // <--- PUT KEY HERE
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZ2V5a3Nlb3Fmd3JrdXR0bnhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NDI3NTYsImV4cCI6MjA4NTUxODc1Nn0.vUDnlgdARv7v0wq98qS1dXTbPKtXfCy0EZy7wfP3hCk'; // <--- PASTE KEY HERE
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
-        
         let activeClientEmail = null;
 
-        // --- 2. NAVIGATION & PIN ---
         function checkPin() {
-            // Change '1234' to your secret PIN
-            if (document.getElementById('pinInput').value === '7850') {
+            if (document.getElementById('pinInput').value === '1234') {
                 showSection('hub-view');
-                // Generate QR only once when logging in
-                new QRCode(document.getElementById("qrcode"), {
-                    text: "Lucky_session_Tracker",
-                    width: 250,
-                    height: 250
-                });
-            } else {
-                alert("Incorrect PIN");
-            }
+                new QRCode(document.getElementById("qrcode"), { text: "Lucky_session_Tracker", width: 250, height: 250 });
+            } else { alert("Incorrect PIN"); }
         }
 
-        function showSection(sectionId) {
-            // Hide all views
-            ['pin-overlay', 'hub-view', 'qr-view', 'manager-view'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
-            // Show selected view
-            document.getElementById(sectionId).classList.remove('hidden');
+        function showSection(id) {
+            ['pin-overlay', 'hub-view', 'qr-view', 'manager-view'].forEach(d => document.getElementById(d).classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
         }
 
-        // --- 3. CLIENT MANAGEMENT LOGIC ---
         async function searchClient() {
             const query = document.getElementById('searchQuery').value.toLowerCase().trim();
             const form = document.getElementById('edit-form');
-            
-            if (query.length < 2) {
-                form.classList.add('hidden');
-                return;
-            }
+            if (query.length < 2) { form.classList.add('hidden'); return; }
 
-            // Search by email OR name
             const { data } = await _supabase.from('client_profiles')
-                .select('*')
-                .or(`email.ilike.%${query}%,client_name.ilike.%${query}%`)
-                .limit(1)
-                .single();
+                .select('*').or(`email.ilike.%${query}%,client_name.ilike.%${query}%`).limit(1).single();
 
             if (data) {
                 activeClientEmail = data.email;
                 form.classList.remove('hidden');
-                
-                // Populate fields
                 document.getElementById('displayName').innerText = data.client_name || data.email;
                 document.getElementById('currentBalance').innerText = data.total_sessions - data.sessions_used;
                 document.getElementById('newName').value = data.client_name || "";
                 document.getElementById('newTotal').value = data.total_sessions;
+                document.getElementById('newExpiry').value = data.expiry_date || ""; // Load date
             }
         }
 
         async function saveClient() {
-            const searchInput = document.getElementById('searchQuery').value.toLowerCase().trim();
-            // If we found a client via search, use that email. If not, treat search input as new email.
-            const emailToUse = activeClientEmail || searchInput; 
+            const email = activeClientEmail || document.getElementById('searchQuery').value.toLowerCase().trim();
             const name = document.getElementById('newName').value;
             const total = parseInt(document.getElementById('newTotal').value);
+            const expiry = document.getElementById('newExpiry').value || null; // Capture date
 
-            if (!emailToUse || !total) return alert("Please fill in email and sessions");
+            if (!email || !total) return alert("Fill in email and sessions");
 
             const { error } = await _supabase.from('client_profiles').upsert({ 
-                email: emailToUse, 
+                email: email, 
                 client_name: name, 
-                total_sessions: total 
+                total_sessions: total,
+                expiry_date: expiry // Save date
             }, { onConflict: 'email' });
 
-            if (!error) {
-                alert("Saved Successfully!");
-                searchClient(); // Refresh view
-            } else {
-                alert("Error saving: " + error.message);
-            }
+            if (!error) { alert("Saved!"); searchClient(); } 
+            else { alert("Error: " + error.message); }
         }
 
         async function resetUsage() {
             if (!activeClientEmail) return;
-            if (confirm("Are you sure? This will reset their 'used' sessions to 0.")) {
-                const { error } = await _supabase.from('client_profiles')
-                    .update({ sessions_used: 0 })
-                    .eq('email', activeClientEmail);
-                
-                if (!error) {
-                    alert("Reset Complete.");
-                    searchClient(); // Refresh view
-                }
+            if (confirm("Reset 'used' sessions to 0?")) {
+                await _supabase.from('client_profiles').update({ sessions_used: 0 }).eq('email', activeClientEmail);
+                alert("Reset Complete."); searchClient();
             }
         }
     </script>
