@@ -1,84 +1,67 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.3">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000; min-height: 14.0px}
-    span.s1 {font-kerning: none}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trainer - Lucky Session Tracker</title>
+    <link rel="manifest" href="/manifest.json">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
-<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
-<p class="p1"><span class="s1">&lt;html lang="en"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;head&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;title&gt;Trainer - Lucky Session Tracker&lt;/title&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;link rel="manifest" href="/manifest.json"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;body class="bg-gray-900 text-white p-6 font-sans"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="max-w-md mx-auto text-center"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;h1 class="text-2xl font-bold mb-6 text-blue-400"&gt;Lucky Session Tracker&lt;/h1&gt;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="bg-white p-6 rounded-3xl inline-block mb-4 shadow-2xl"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;div id="qrcode"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;p class="text-gray-400 mb-8 text-sm italic"&gt;Trainer ID: Lucky_session_Tracker&lt;/p&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="bg-gray-800 p-6 rounded-3xl text-left shadow-xl border border-gray-700"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;h2 class="font-bold mb-4 text-lg"&gt;Add Client Package&lt;/h2&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;input id="clientEmail" type="email" placeholder="Client Email" class="w-full bg-gray-700 p-4 rounded-xl mb-3 outline-none focus:ring-2 ring-blue-500 text-white"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;input id="amount" type="number" placeholder="Number of Sessions (e.g. 10)" class="w-full bg-gray-700 p-4 rounded-xl mb-4 outline-none"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;button onclick="addSessions()" class="w-full bg-blue-600 hover:bg-blue-700 p-4 rounded-xl font-bold transition-all transform active:scale-95"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>Update Client Balance</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// 1. SETUP SUPABASE (Replace with your keys!)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const supabaseUrl = 'sb_publishable_3Yr5BSfr4uHi7X8DfHmNSQ_uQPD-ofH';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const supabaseKey = 'sb_publishable_3Yr5BSfr4uHi7X8DfHmNSQ_uQPD-ofH';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const supabase = supabase.createClient(supabaseUrl, supabaseKey);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// 2. GENERATE QR</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>new QRCode(document.getElementById("qrcode"), "Lucky_session_Tracker");</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// 3. ADD SESSIONS LOGIC</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>async function addSessions() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const email = document.getElementById('clientEmail').value.toLowerCase();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const amount = parseInt(document.getElementById('amount').value);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (!email || !amount) return alert("Please fill both fields");</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Check if client exists</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const { data: client } = await supabase.from('client_profiles').select('*').eq('email', email).single();</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (client) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const { error } = await supabase.from('client_profiles')</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>.update({ total_sessions: client.total_sessions + amount })</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>.eq('email', email);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (!error) alert("Package Added Successfully!");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>// If new client, create them</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const { error } = await supabase.from('client_profiles')</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>.insert([{ email, total_sessions: amount, sessions_used: 0 }]);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (!error) alert("New Client Created &amp; Package Added!");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// 4. PWA REGISTER</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+<body class="bg-gray-900 text-white p-6 font-sans">
+    <div class="max-w-md mx-auto text-center">
+        <h1 class="text-2xl font-bold mb-6 text-blue-400">Lucky Session Tracker</h1>
+        
+        <div class="bg-white p-6 rounded-3xl inline-block mb-4 shadow-2xl">
+            <div id="qrcode"></div>
+        </div>
+        <p class="text-gray-400 mb-8 text-sm italic">Trainer ID: Lucky_session_Tracker</p>
+
+        <div class="bg-gray-800 p-6 rounded-3xl text-left shadow-xl border border-gray-700">
+            <h2 class="font-bold mb-4 text-lg">Add Client Package</h2>
+            <input id="clientEmail" type="email" placeholder="Client Email" class="w-full bg-gray-700 p-4 rounded-xl mb-3 outline-none focus:ring-2 ring-blue-500 text-white">
+            <input id="amount" type="number" placeholder="Number of Sessions (e.g. 10)" class="w-full bg-gray-700 p-4 rounded-xl mb-4 outline-none">
+            <button onclick="addSessions()" class="w-full bg-blue-600 hover:bg-blue-700 p-4 rounded-xl font-bold transition-all transform active:scale-95">
+                Update Client Balance
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 1. SETUP SUPABASE (Replace with your keys!)
+        const supabaseUrl = 'sb_publishable_3Yr5BSfr4uHi7X8DfHmNSQ_uQPD-ofH';
+        const supabaseKey = 'sb_publishable_3Yr5BSfr4uHi7X8DfHmNSQ_uQPD-ofH';
+        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        // 2. GENERATE QR
+        new QRCode(document.getElementById("qrcode"), "Lucky_session_Tracker");
+
+        // 3. ADD SESSIONS LOGIC
+        async function addSessions() {
+            const email = document.getElementById('clientEmail').value.toLowerCase();
+            const amount = parseInt(document.getElementById('amount').value);
+
+            if (!email || !amount) return alert("Please fill both fields");
+
+            // Check if client exists
+            const { data: client } = await supabase.from('client_profiles').select('*').eq('email', email).single();
+
+            if (client) {
+                const { error } = await supabase.from('client_profiles')
+                    .update({ total_sessions: client.total_sessions + amount })
+                    .eq('email', email);
+                if (!error) alert("Package Added Successfully!");
+            } else {
+                // If new client, create them
+                const { error } = await supabase.from('client_profiles')
+                    .insert([{ email, total_sessions: amount, sessions_used: 0 }]);
+                if (!error) alert("New Client Created & Package Added!");
+            }
+        }
+
+        // 4. PWA REGISTER
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }
+    </script>
 </body>
 </html>
