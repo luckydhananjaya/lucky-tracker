@@ -4,47 +4,86 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Client - Lucky Session Tracker</title>
-    <link rel="manifest" href="/manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-blue-600 text-white p-6 font-sans">
     <div class="max-w-md mx-auto">
-        <div class="bg-white rounded-[2rem] p-8 text-center shadow-2xl text-gray-900 mb-6">
-            <p class="text-gray-400 font-bold uppercase text-xs tracking-widest">Remaining Sessions</p>
+        <div class="bg-white rounded-[2.5rem] p-8 text-center shadow-2xl text-gray-900 mb-6 mt-10">
+            <p class="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Remaining Sessions</p>
             <h2 class="text-8xl font-black my-4 text-blue-600" id="balance">--</h2>
-            <input id="userEmail" type="email" placeholder="Enter your email" class="w-full border-2 border-gray-100 p-3 rounded-xl text-center mb-2 outline-none focus:border-blue-500">
-            <button onclick="fetchBalance()" class="text-blue-500 font-bold text-sm">Check My Status</button>
+            <input id="userEmail" type="email" placeholder="Enter your email" class="w-full border-2 border-gray-100 p-4 rounded-2xl text-center mb-2 outline-none focus:border-blue-500">
+            <button onclick="fetchBalance()" class="text-blue-500 font-bold text-sm py-2">Check My Status</button>
         </div>
 
         <div id="scanner-container" class="hidden fixed inset-0 bg-black z-50 p-6 flex flex-col justify-center">
             <div id="reader" class="rounded-3xl overflow-hidden border-4 border-blue-500"></div>
-            <button onclick="stopScanner()" class="mt-10 text-white font-bold bg-red-500 p-5 rounded-2xl shadow-lg">Cancel Scan</button>
+            <button onclick="stopScanner()" class="mt-10 text-white font-bold bg-red-500 p-5 rounded-2xl">Cancel Scan</button>
         </div>
 
-        <button onclick="startScanner()" class="w-full bg-gray-900 py-6 rounded-[2rem] font-black text-xl shadow-xl active:scale-95 transition-all">
+        <button onclick="startScanner()" class="w-full bg-gray-900 py-6 rounded-[2.5rem] font-black text-xl shadow-xl active:scale-95 transition-all uppercase">
             SCAN LUCKY'S PHONE
         </button>
     </div>
 
-   <script>
-    const supabaseUrl = 'https://umgeykseoqfwrkuttnxm.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZ2V5a3Nlb3Fmd3JrdXR0bnhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NDI3NTYsImV4cCI6MjA4NTUxODc1Nn0.vUDnlgdARv7v0wq98qS1dXTbPKtXfCy0EZy7wfP3hCk';
-    const { createClient } = supabase;
-    const _supabase = createClient(supabaseUrl, supabaseKey);
+    <script>
+        const supabaseUrl = 'https://umgeykseoqfwrkuttnxm.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZ2V5a3Nlb3Fmd3JrdXR0bnhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NDI3NTYsImV4cCI6MjA4NTUxODc1Nn0.vUDnlgdARv7v0wq98qS1dXTbPKtXfCy0EZy7wfP3hCk'; 
+        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    async function handleCheckIn(email) {
-        // This calls the SQL function we created in your database
-        const { error } = await _supabase.rpc('check_in_client', { target_email: email });
-        
-        if (!error) {
-            alert("Check-in Successful! Session deducted.");
-            fetchBalance(); // Refresh the number on their screen
-        } else {
-            alert("Check-in failed. Check your balance or connection.");
+        let html5QrCode;
+
+        async function fetchBalance() {
+            const email = document.getElementById('userEmail').value.toLowerCase().trim();
+            if (!email) return alert("Enter your email!");
+
+            const { data, error } = await _supabase.from('client_profiles').select('*').eq('email', email).single();
+            if (data) {
+                document.getElementById('balance').innerText = data.total_sessions - data.sessions_used;
+            } else {
+                alert("Account not found. Ask Lucky to register you.");
+            }
         }
-    }
-</script>
+
+        async function startScanner() {
+            const email = document.getElementById('userEmail').value;
+            if(!email) return alert("Please enter your email first!");
+            
+            document.getElementById('scanner-container').classList.remove('hidden');
+            html5QrCode = new Html5Qrcode("reader");
+            
+            await html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: 250 },
+                (decodedText) => {
+                    if (decodedText === "Lucky_session_Tracker") {
+                        handleCheckIn(email.toLowerCase().trim());
+                        stopScanner();
+                    }
+                }
+            );
+        }
+
+        function stopScanner() {
+            if(html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('scanner-container').classList.add('hidden');
+                });
+            } else {
+                document.getElementById('scanner-container').classList.add('hidden');
+            }
+        }
+
+        async function handleCheckIn(email) {
+            const { error } = await _supabase.rpc('check_in_client', { target_email: email });
+            if (!error) {
+                alert("Check-in Successful!");
+                fetchBalance();
+            } else {
+                alert("Check-in failed. Check your balance.");
+            }
+        }
+    </script>
 </body>
 </html>
