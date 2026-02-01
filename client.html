@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Client - Lucky Session Tracker</title>
+    <link rel="manifest" href="/manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -11,10 +12,13 @@
 <body class="bg-blue-600 text-white p-6 font-sans">
     <div class="max-w-md mx-auto">
         <div class="bg-white rounded-[2.5rem] p-8 text-center shadow-2xl text-gray-900 mb-6 mt-10">
-            <p class="text-gray-400 font-bold uppercase text-[10px] tracking-widest">Remaining Sessions</p>
+            <p id="clientGreeting" class="text-blue-500 font-bold uppercase text-[10px] mb-2 tracking-widest text-center w-full">Welcome</p>
             <h2 class="text-8xl font-black my-4 text-blue-600" id="balance">--</h2>
-            <input id="userEmail" type="email" placeholder="Enter your email" class="w-full border-2 border-gray-100 p-4 rounded-2xl text-center mb-2 outline-none focus:border-blue-500">
-            <button onclick="fetchBalance()" class="text-blue-500 font-bold text-sm py-2">Check My Status</button>
+            <p class="text-gray-400 text-xs font-bold uppercase mb-4">Sessions Left</p>
+            
+            <input id="userEmail" type="email" placeholder="Enter your email" class="w-full border-2 border-gray-100 p-4 rounded-2xl text-center mb-4 outline-none focus:border-blue-500">
+            
+            <button onclick="fetchBalance()" class="text-blue-500 font-bold text-sm hover:underline">Check My Status</button>
         </div>
 
         <div id="scanner-container" class="hidden fixed inset-0 bg-black z-50 p-6 flex flex-col justify-center">
@@ -28,27 +32,45 @@
     </div>
 
     <script>
+        // 1. SETUP SUPABASE
+        // Replace these with your actual keys from Supabase Settings > API
         const supabaseUrl = 'https://umgeykseoqfwrkuttnxm.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZ2V5a3Nlb3Fmd3JrdXR0bnhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NDI3NTYsImV4cCI6MjA4NTUxODc1Nn0.vUDnlgdARv7v0wq98qS1dXTbPKtXfCy0EZy7wfP3hCk'; 
-        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        const { createClient } = supabase;
+        const _supabase = createClient(supabaseUrl, supabaseKey);
 
         let html5QrCode;
 
+        // 2. FETCH BALANCE & NAME
         async function fetchBalance() {
-            const email = document.getElementById('userEmail').value.toLowerCase().trim();
-            if (!email) return alert("Enter your email!");
+            const emailInput = document.getElementById('userEmail').value.toLowerCase().trim();
+            if (!emailInput) return alert("Please enter your email!");
 
-            const { data, error } = await _supabase.from('client_profiles').select('*').eq('email', email).single();
+            const { data, error } = await _supabase
+                .from('client_profiles')
+                .select('client_name, total_sessions, sessions_used')
+                .eq('email', emailInput)
+                .single();
+
+            if (error) {
+                alert("Account not found. Please ask Lucky to register your email.");
+                console.error(error);
+                return;
+            }
+
             if (data) {
-                document.getElementById('balance').innerText = data.total_sessions - data.sessions_used;
-            } else {
-                alert("Account not found. Ask Lucky to register you.");
+                const remaining = data.total_sessions - data.sessions_used;
+                document.getElementById('balance').innerText = remaining;
+                
+                const name = data.client_name ? data.client_name : "Client";
+                document.getElementById('clientGreeting').innerText = `Welcome, ${name}`;
             }
         }
 
+        // 3. SCANNER LOGIC
         async function startScanner() {
             const email = document.getElementById('userEmail').value;
-            if(!email) return alert("Please enter your email first!");
+            if(!email) return alert("Please enter your email first to identify yourself!");
             
             document.getElementById('scanner-container').classList.remove('hidden');
             html5QrCode = new Html5Qrcode("reader");
@@ -57,6 +79,7 @@
                 { facingMode: "environment" },
                 { fps: 10, qrbox: 250 },
                 (decodedText) => {
+                    // This matches the ID set in your Trainer QR code
                     if (decodedText === "Lucky_session_Tracker") {
                         handleCheckIn(email.toLowerCase().trim());
                         stopScanner();
@@ -69,20 +92,30 @@
             if(html5QrCode) {
                 html5QrCode.stop().then(() => {
                     document.getElementById('scanner-container').classList.add('hidden');
+                }).catch(() => {
+                    document.getElementById('scanner-container').classList.add('hidden');
                 });
             } else {
                 document.getElementById('scanner-container').classList.add('hidden');
             }
         }
 
+        // 4. DATABASE CHECK-IN
         async function handleCheckIn(email) {
+            // Calls the SQL function in your Supabase database
             const { error } = await _supabase.rpc('check_in_client', { target_email: email });
+            
             if (!error) {
-                alert("Check-in Successful!");
-                fetchBalance();
+                alert("Check-in Successful! Enjoy your Pilates session.");
+                fetchBalance(); // Refresh the balance display
             } else {
-                alert("Check-in failed. Check your balance.");
+                alert("Check-in failed. You might have 0 sessions left or a connection issue.");
             }
+        }
+
+        // 5. PWA SERVICE WORKER
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
         }
     </script>
 </body>
