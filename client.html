@@ -17,16 +17,23 @@
             <p class="text-blue-200 text-xs font-bold tracking-widest uppercase">Blueprint Mvmnt</p>
         </div>
 
-        <div class="bg-white rounded-[2.5rem] p-8 text-center shadow-2xl text-gray-900 mb-6">
-            <p id="clientGreeting" class="text-blue-500 font-bold uppercase text-[10px] mb-2 tracking-widest text-center w-full">Welcome</p>
+        <div class="bg-white rounded-[2.5rem] p-8 text-center shadow-2xl text-gray-900 mb-6 relative overflow-hidden">
+            
+            <div id="alertBanner" class="hidden absolute top-0 left-0 w-full p-3 text-white text-xs font-bold uppercase tracking-widest">
+                </div>
+
+            <p id="clientGreeting" class="text-blue-500 font-bold uppercase text-[10px] mb-2 tracking-widest text-center w-full mt-4">Welcome</p>
             
             <h2 class="text-8xl font-black my-4 text-blue-600" id="balance">--</h2>
-            <p class="text-gray-400 text-xs font-bold uppercase mb-6">Sessions Left</p>
+            <p class="text-gray-400 text-xs font-bold uppercase mb-2">Sessions Left</p>
+            
+            <p id="expiryDisplay" class="text-gray-400 text-[10px] font-bold uppercase mb-6 hidden">
+                Valid Until: <span id="expiryDate" class="text-gray-600">--</span>
+            </p>
             
             <div class="space-y-3">
-                <input id="userName" type="text" placeholder="Your Name (Optional)" class="w-full border-2 border-gray-100 p-4 rounded-2xl text-center outline-none focus:border-blue-500 bg-gray-50 transition-all text-gray-900">
-                
-                <input id="userEmail" type="email" placeholder="Your Email" class="w-full border-2 border-gray-100 p-4 rounded-2xl text-center outline-none focus:border-blue-500 bg-gray-50 transition-all text-gray-900">
+                <input id="userName" type="text" placeholder="Your Name (Optional)" class="w-full border-2 border-gray-100 p-4 rounded-2xl text-center outline-none focus:border-blue-500 bg-gray-50 text-gray-900 transition-all">
+                <input id="userEmail" type="email" placeholder="Your Email" class="w-full border-2 border-gray-100 p-4 rounded-2xl text-center outline-none focus:border-blue-500 bg-gray-50 text-gray-900 transition-all">
             </div>
             
             <button onclick="fetchBalance()" class="mt-4 text-blue-500 font-bold text-sm hover:underline py-2">Check My Status</button>
@@ -52,99 +59,100 @@
 
         const { createClient } = supabase;
         const _supabase = createClient(supabaseUrl, supabaseKey);
-
         let html5QrCode;
 
-        // 2. FETCH BALANCE & REGISTER NAME
         async function fetchBalance() {
             const emailInput = document.getElementById('userEmail').value.toLowerCase().trim();
             const nameInput = document.getElementById('userName').value.trim();
+            const banner = document.getElementById('alertBanner');
 
             if (!emailInput) return alert("Please enter your email!");
 
-            // STEP A: Check if they exist in YOUR list first
+            // Reset UI
+            banner.classList.add('hidden');
+            document.getElementById('expiryDisplay').classList.add('hidden');
+
+            // 1. Fetch Data
             const { data, error } = await _supabase
                 .from('client_profiles')
-                .select('client_name, total_sessions, sessions_used')
+                .select('client_name, total_sessions, sessions_used, expiry_date')
                 .eq('email', emailInput)
                 .single();
 
-            // If error or no data, they are NOT registered
-            if (error || !data) {
-                alert("Account not found! You must register with Lucky first.");
-                return;
-            }
+            if (error || !data) { alert("Account not found!"); return; }
 
-            // STEP B: If they exist, AND they typed a new name, update it now
+            // 2. Update Name if needed
             if (nameInput && nameInput !== data.client_name) {
-                await _supabase
-                    .from('client_profiles')
-                    .update({ client_name: nameInput })
-                    .eq('email', emailInput);
-                
+                await _supabase.from('client_profiles').update({ client_name: nameInput }).eq('email', emailInput);
                 document.getElementById('clientGreeting').innerText = `Welcome, ${nameInput}`;
             } else {
-                const displayName = data.client_name || nameInput || "Client";
-                document.getElementById('clientGreeting').innerText = `Welcome, ${displayName}`;
-                
-                if (!nameInput && data.client_name) {
-                    document.getElementById('userName').value = data.client_name;
-                }
+                document.getElementById('clientGreeting').innerText = `Welcome, ${data.client_name || nameInput || "Client"}`;
+                if (!nameInput && data.client_name) document.getElementById('userName').value = data.client_name;
             }
 
-            // STEP C: Show Balance
-            const remaining = data.total_sessions - data.sessions_used;
-            document.getElementById('balance').innerText = remaining;
+            // 3. Update Balance
+            document.getElementById('balance').innerText = data.total_sessions - data.sessions_used;
+
+            // 4. Check Expiry Logic
+            if (data.expiry_date) {
+                const expiry = new Date(data.expiry_date);
+                const today = new Date();
+                
+                // Calculate difference in days
+                const diffTime = expiry - today; 
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+
+                document.getElementById('expiryDisplay').classList.remove('hidden');
+                document.getElementById('expiryDate').innerText = data.expiry_date;
+
+                // ALERT LOGIC
+                if (diffDays < 0) {
+                    // EXPIRED
+                    banner.innerText = "PACKAGE EXPIRED";
+                    banner.className = "absolute top-0 left-0 w-full p-3 text-white text-xs font-bold uppercase tracking-widest bg-gray-800";
+                    banner.classList.remove('hidden');
+                } 
+                else if (diffDays <= 3) {
+                    // CRITICAL (3 Days left)
+                    banner.innerText = `EXPIRING SOON (${diffDays} DAYS LEFT)`;
+                    banner.className = "absolute top-0 left-0 w-full p-3 text-white text-xs font-bold uppercase tracking-widest bg-red-500 animate-pulse";
+                    banner.classList.remove('hidden');
+                } 
+                else if (diffDays <= 7) {
+                    // WARNING (7 Days left)
+                    banner.innerText = "EXPIRING IN 1 WEEK";
+                    banner.className = "absolute top-0 left-0 w-full p-3 text-white text-xs font-bold uppercase tracking-widest bg-orange-500";
+                    banner.classList.remove('hidden');
+                }
+            }
         }
 
-        // 3. SCANNER LOGIC
         async function startScanner() {
             const email = document.getElementById('userEmail').value;
-            if(!email) return alert("Please enter your email first to identify yourself!");
-            
+            if(!email) return alert("Enter email first!");
             document.getElementById('scanner-container').classList.remove('hidden');
             html5QrCode = new Html5Qrcode("reader");
-            
-            await html5QrCode.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: 250 },
-                (decodedText) => {
-                    if (decodedText === "Lucky_session_Tracker") {
-                        handleCheckIn(email.toLowerCase().trim());
-                        stopScanner();
-                    }
-                }
-            );
+            await html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (decodedText) => {
+                if (decodedText === "Lucky_session_Tracker") { handleCheckIn(email.toLowerCase().trim()); stopScanner(); }
+            });
         }
 
         function stopScanner() {
-            if(html5QrCode) {
-                html5QrCode.stop().then(() => {
-                    document.getElementById('scanner-container').classList.add('hidden');
-                }).catch(() => {
-                    document.getElementById('scanner-container').classList.add('hidden');
-                });
-            } else {
-                document.getElementById('scanner-container').classList.add('hidden');
-            }
+            if(html5QrCode) html5QrCode.stop().then(() => document.getElementById('scanner-container').classList.add('hidden')).catch(() => {});
+            else document.getElementById('scanner-container').classList.add('hidden');
         }
 
-        // 4. DATABASE CHECK-IN
         async function handleCheckIn(email) {
             const { error } = await _supabase.rpc('check_in_client', { target_email: email });
-            
             if (!error) {
                 alert("Check-in Successful! Enjoy your session."); 
                 fetchBalance(); 
             } else {
-                alert("Check-in failed. You might have 0 sessions left or a connection issue.");
+                alert("Check-in Failed: " + error.message); 
             }
         }
 
-        // 5. PWA SERVICE WORKER
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js');
-        }
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
     </script>
 </body>
 </html>
