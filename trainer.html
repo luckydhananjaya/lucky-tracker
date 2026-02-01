@@ -25,13 +25,18 @@
             <h2 class="text-2xl font-bold">Trainer Dashboard</h2>
             <p class="text-gray-500 text-sm">Select an Action</p>
         </div>
+
         <button onclick="showSection('qr-view')" class="w-full max-w-sm bg-gradient-to-br from-blue-600 to-blue-800 p-8 rounded-[2rem] shadow-2xl active:scale-95 transition-all text-left relative overflow-hidden group">
+            <div class="absolute right-[-20px] bottom-[-20px] text-blue-500/30">
+                <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M3 3h8v8H3zm2 2v4h4V5zm8-2h8v8h-8zm2 2v4h4V5zM3 13h8v8H3zm2 2v4h4v-4zm8-2h8v8h-8zm2 2v4h4v-4z"/></svg>
+            </div>
             <h3 class="text-2xl font-black italic uppercase relative z-10">Show QR Code</h3>
             <p class="text-blue-200 text-sm relative z-10 mt-1">For clients to scan</p>
         </button>
+
         <button onclick="showSection('manager-view')" class="w-full max-w-sm bg-gray-800 border border-gray-700 p-8 rounded-[2rem] shadow-xl active:scale-95 transition-all text-left relative overflow-hidden">
             <h3 class="text-2xl font-black italic uppercase text-gray-200">Manage Clients</h3>
-            <p class="text-gray-500 text-sm mt-1">Add sessions, Expiry, Reset</p>
+            <p class="text-gray-500 text-sm mt-1">Add sessions, Edit, Reset</p>
         </button>
     </div>
 
@@ -45,7 +50,6 @@
 
     <div id="manager-view" class="hidden min-h-screen flex flex-col items-center pt-20 p-6">
         <button onclick="showSection('hub-view')" class="absolute top-6 left-6 text-gray-400 hover:text-white flex items-center font-bold">← Back</button>
-
         <h2 class="text-2xl font-bold mb-6">Client Manager</h2>
 
         <div class="w-full max-w-md bg-gray-800/50 p-6 rounded-[2rem] border border-gray-700 backdrop-blur-md mb-6">
@@ -70,7 +74,6 @@
                     <label class="text-xs text-gray-500 ml-2">Client Name</label>
                     <input id="newName" type="text" class="w-full bg-gray-900 p-3 rounded-xl border border-gray-700 outline-none focus:border-blue-500 text-white">
                 </div>
-                
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="text-xs text-gray-500 ml-2">Total Sessions</label>
@@ -78,17 +81,12 @@
                     </div>
                     <div>
                         <label class="text-xs text-gray-500 ml-2">Expiry Date</label>
-                        <input id="newExpiry" type="date" class="w-full bg-gray-900 p-3 rounded-xl border border-gray-700 outline-none focus:border-blue-500 text-white [color-scheme:dark]">
+                        <input id="newExpiry" type="date" class="w-full bg-gray-900 p-3 rounded-xl border border-gray-700 outline-none focus:border-blue-500 text-white scheme-dark">
                     </div>
                 </div>
 
-                <button onclick="saveClient()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold shadow-lg mt-2">
-                    SAVE CHANGES
-                </button>
-                
-                <button onclick="resetUsage()" class="w-full border border-red-500/50 text-red-400 hover:bg-red-500/10 py-3 rounded-xl font-bold text-sm">
-                    RESET SCANS TO 0
-                </button>
+                <button onclick="saveClient()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold shadow-lg mt-2">SAVE CHANGES</button>
+                <button onclick="resetUsage()" class="w-full border border-red-500/50 text-red-400 hover:bg-red-500/10 py-3 rounded-xl font-bold text-sm">RESET SCANS TO 0</button>
             </div>
         </div>
     </div>
@@ -97,6 +95,7 @@
         const supabaseUrl = 'https://umgeykseoqfwrkuttnxm.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZ2V5a3Nlb3Fmd3JrdXR0bnhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NDI3NTYsImV4cCI6MjA4NTUxODc1Nn0.vUDnlgdARv7v0wq98qS1dXTbPKtXfCy0EZy7wfP3hCk'; // <--- PASTE KEY HERE
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        
         let activeClientEmail = null;
 
         function checkPin() {
@@ -106,9 +105,9 @@
             } else { alert("Incorrect PIN"); }
         }
 
-        function showSection(id) {
-            ['pin-overlay', 'hub-view', 'qr-view', 'manager-view'].forEach(d => document.getElementById(d).classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
+        function showSection(sectionId) {
+            ['pin-overlay', 'hub-view', 'qr-view', 'manager-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.getElementById(sectionId).classList.remove('hidden');
         }
 
         async function searchClient() {
@@ -126,34 +125,36 @@
                 document.getElementById('currentBalance').innerText = data.total_sessions - data.sessions_used;
                 document.getElementById('newName').value = data.client_name || "";
                 document.getElementById('newTotal').value = data.total_sessions;
-                document.getElementById('newExpiry').value = data.expiry_date || ""; // Load date
+                // Load the saved date if it exists
+                document.getElementById('newExpiry').value = data.expiry_date || ""; 
             }
         }
 
         async function saveClient() {
-            const email = activeClientEmail || document.getElementById('searchQuery').value.toLowerCase().trim();
+            const searchInput = document.getElementById('searchQuery').value.toLowerCase().trim();
+            const emailToUse = activeClientEmail || searchInput; 
             const name = document.getElementById('newName').value;
             const total = parseInt(document.getElementById('newTotal').value);
-            const expiry = document.getElementById('newExpiry').value || null; // Capture date
+            const expiry = document.getElementById('newExpiry').value; // Get the date
 
-            if (!email || !total) return alert("Fill in email and sessions");
+            if (!emailToUse || !total) return alert("Please fill in email and sessions");
 
             const { error } = await _supabase.from('client_profiles').upsert({ 
-                email: email, 
+                email: emailToUse, 
                 client_name: name, 
                 total_sessions: total,
-                expiry_date: expiry // Save date
+                expiry_date: expiry ? expiry : null // Save the date
             }, { onConflict: 'email' });
 
-            if (!error) { alert("Saved!"); searchClient(); } 
-            else { alert("Error: " + error.message); }
+            if (!error) { alert("Saved Successfully!"); searchClient(); } 
+            else { alert("Error saving: " + error.message); }
         }
 
         async function resetUsage() {
             if (!activeClientEmail) return;
-            if (confirm("Reset 'used' sessions to 0?")) {
-                await _supabase.from('client_profiles').update({ sessions_used: 0 }).eq('email', activeClientEmail);
-                alert("Reset Complete."); searchClient();
+            if (confirm("Reset their 'used' sessions to 0?")) {
+                const { error } = await _supabase.from('client_profiles').update({ sessions_used: 0 }).eq('email', activeClientEmail);
+                if (!error) { alert("Reset Complete."); searchClient(); }
             }
         }
     </script>
