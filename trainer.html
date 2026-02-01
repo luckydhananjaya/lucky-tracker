@@ -3,63 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lucky Session Tracker - Trainer</title>
+    <title>Trainer - Lucky Session Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="bg-[#0f172a] text-white min-h-screen flex flex-col items-center p-6 font-sans">
     
-    <h1 class="text-2xl font-black text-blue-500 mt-8 mb-2 italic">LUCKY SESSION TRACKER</h1>
+    <h1 class="text-2xl font-black text-blue-500 mt-8 mb-2 italic uppercase">Lucky Session Tracker</h1>
     <p class="text-gray-500 text-xs tracking-widest mb-8">TRAINER DASHBOARD</p>
 
     <div class="bg-white p-4 rounded-3xl shadow-[0_0_50px_rgba(59,130,246,0.5)] mb-10">
         <div id="qrcode"></div>
     </div>
 
-    <div class="w-full max-w-sm bg-gray-800/50 border border-gray-700 p-6 rounded-[2.5rem] backdrop-blur-md">
+    <div class="w-full max-w-sm bg-gray-800/50 border border-gray-700 p-6 rounded-[2.5rem] backdrop-blur-md shadow-2xl">
         <h2 class="text-lg font-bold mb-4 text-center">Add Client Package</h2>
-        <input id="clientEmail" type="email" placeholder="Client Email" class="w-full bg-gray-900 border border-gray-700 p-4 rounded-2xl mb-3 outline-none focus:border-blue-500 transition-all">
-        <input id="amount" type="number" placeholder="Number of Sessions" class="w-full bg-gray-900 border border-gray-700 p-4 rounded-2xl mb-4 outline-none focus:border-blue-500 transition-all">
+        <input id="clientEmail" type="email" placeholder="Client Email" class="w-full bg-gray-900 border border-gray-700 p-4 rounded-2xl mb-3 outline-none focus:border-blue-500 text-white">
+        <input id="amount" type="number" placeholder="Number of Sessions" class="w-full bg-gray-900 border border-gray-700 p-4 rounded-2xl mb-4 outline-none focus:border-blue-500 text-white">
         
-        <button onclick="addSessions()" class="w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-2xl font-black text-lg shadow-lg active:scale-95 transition-all">
+        <button id="updateBtn" onclick="addSessions()" class="w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-2xl font-black text-lg shadow-lg active:scale-95 transition-all">
             UPDATE CLIENT BALANCE
         </button>
     </div>
 
     <script>
-        // Use your actual keys here
+        // Use your URL from Screenshot 20.02.40
         const supabaseUrl = 'https://umgeykseoqfwrkuttnxm.supabase.co';
+        // Use your Anon Key from Screenshot 19.58.55
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZ2V5a3Nlb3Fmd3JrdXR0bnhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NDI3NTYsImV4cCI6MjA4NTUxODc1Nn0.vUDnlgdARv7v0wq98qS1dXTbPKtXfCy0EZy7wfP3hCk'; 
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // Generate the QR Code - This is the "Lucky_session_Tracker" ID
-        var qrcode = new QRCode(document.getElementById("qrcode"), {
+        // Generate the QR
+        new QRCode(document.getElementById("qrcode"), {
             text: "Lucky_session_Tracker",
             width: 200,
-            height: 200,
-            colorDark : "#000000",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H
+            height: 200
         });
 
         async function addSessions() {
+            const btn = document.getElementById('updateBtn');
             const email = document.getElementById('clientEmail').value.toLowerCase().trim();
             const amount = parseInt(document.getElementById('amount').value);
 
-            if (!email || !amount) return alert("Fill both fields!");
+            if (!email || isNaN(amount)) return alert("Please enter a valid email and number.");
+            
+            btn.innerText = "Processing...";
+            btn.disabled = true;
 
-            const { data: client } = await _supabase.from('client_profiles').select('*').eq('email', email).single();
+            try {
+                const { data: client } = await _supabase.from('client_profiles').select('*').eq('email', email).single();
 
-            if (client) {
-                const { error } = await _supabase.from('client_profiles')
-                    .update({ total_sessions: client.total_sessions + amount })
-                    .eq('email', email);
-                if (!error) alert("Package Updated!");
-            } else {
-                const { error } = await _supabase.from('client_profiles')
-                    .insert([{ email: email, total_sessions: amount, sessions_used: 0 }]);
-                if (!error) alert("New Client Created!");
+                if (client) {
+                    const { error } = await _supabase.from('client_profiles')
+                        .update({ total_sessions: client.total_sessions + amount })
+                        .eq('email', email);
+                    if (!error) alert("Package Updated!");
+                } else {
+                    const { error } = await _supabase.from('client_profiles')
+                        .insert([{ email: email, total_sessions: amount, sessions_used: 0 }]);
+                    if (!error) alert("New Client Created!");
+                }
+            } catch (err) {
+                alert("Error connecting to database.");
+            } finally {
+                btn.innerText = "UPDATE CLIENT BALANCE";
+                btn.disabled = false;
             }
         }
     </script>
