@@ -30,8 +30,9 @@
 
     <script>
         // 1. SETUP SUPABASE (Replace with your keys!)
-        const supabaseUrl = 'sb_publishable_3Yr5BSfr4uHi7X8DfHmNSQ_uQPD-ofH';
+        const supabaseUrl = 'https://umgeykseoqfwrkuttnxm.supabase.co';
         const supabaseKey = 'sb_publishable_3Yr5BSfr4uHi7X8DfHmNSQ_uQPD-ofH';
+        const { createClient } = supabase;
         const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
         // 2. GENERATE QR
