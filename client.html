@@ -33,9 +33,8 @@
 
     <script>
         // 1. SETUP SUPABASE
-        // Replace these with your actual keys from Supabase Settings > API
         const supabaseUrl = 'https://umgeykseoqfwrkuttnxm.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZ2V5a3Nlb3Fmd3JrdXR0bnhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NDI3NTYsImV4cCI6MjA4NTUxODc1Nn0.vUDnlgdARv7v0wq98qS1dXTbPKtXfCy0EZy7wfP3hCk'; 
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZ2V5a3Nlb3Fmd3JrdXR0bnhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NDI3NTYsImV4cCI6MjA4NTUxODc1Nn0.vUDnlgdARv7v0wq98qS1dXTbPKtXfCy0EZy7wfP3hCk'; // <--- PASTE KEY HERE
         const { createClient } = supabase;
         const _supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -79,7 +78,6 @@
                 { facingMode: "environment" },
                 { fps: 10, qrbox: 250 },
                 (decodedText) => {
-                    // This matches the ID set in your Trainer QR code
                     if (decodedText === "Lucky_session_Tracker") {
                         handleCheckIn(email.toLowerCase().trim());
                         stopScanner();
@@ -102,12 +100,12 @@
 
         // 4. DATABASE CHECK-IN
         async function handleCheckIn(email) {
-            // Calls the SQL function in your Supabase database
             const { error } = await _supabase.rpc('check_in_client', { target_email: email });
             
             if (!error) {
-                alert("Check-in Successful! Enjoy your Pilates session.");
-                fetchBalance(); // Refresh the balance display
+                // CHANGED TEXT BELOW:
+                alert("Check-in Successful! Enjoy your session."); 
+                fetchBalance(); 
             } else {
                 alert("Check-in failed. You might have 0 sessions left or a connection issue.");
             }
