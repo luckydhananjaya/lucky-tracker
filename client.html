@@ -28,63 +28,23 @@
         </button>
     </div>
 
-    <script>
-        // 1. SETUP SUPABASE (Replace with your keys!)
-        const supabaseUrl = 'https://umgeykseoqfwrkuttnxm.supabase.co';
-        const supabaseKey = 'sb_publishable_3Yr5BSfr4uHi7X8DfHmNSQ_uQPD-ofH';
-        const { createClient } = supabase;
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+   <script>
+    const supabaseUrl = 'https://umgeykseoqfwrkuttnxm.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZ2V5a3Nlb3Fmd3JrdXR0bnhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NDI3NTYsImV4cCI6MjA4NTUxODc1Nn0.vUDnlgdARv7v0wq98qS1dXTbPKtXfCy0EZy7wfP3hCk';
+    const { createClient } = supabase;
+    const _supabase = createClient(supabaseUrl, supabaseKey);
 
-        let html5QrCode;
-
-        // 2. FETCH BALANCE
-        async function fetchBalance() {
-            const email = document.getElementById('userEmail').value.toLowerCase();
-            const { data, error } = await supabase.from('client_profiles').select('*').eq('email', email).single();
-            if (data) {
-                document.getElementById('balance').innerText = data.total_sessions - data.sessions_used;
-            } else {
-                alert("Client not found. Ask Lucky to add your email.");
-            }
+    async function handleCheckIn(email) {
+        // This calls the SQL function we created in your database
+        const { error } = await _supabase.rpc('check_in_client', { target_email: email });
+        
+        if (!error) {
+            alert("Check-in Successful! Session deducted.");
+            fetchBalance(); // Refresh the number on their screen
+        } else {
+            alert("Check-in failed. Check your balance or connection.");
         }
-
-        // 3. SCANNER LOGIC
-        async function startScanner() {
-            const email = document.getElementById('userEmail').value;
-            if(!email) return alert("Please enter your email first!");
-            
-            document.getElementById('scanner-container').classList.remove('hidden');
-            html5QrCode = new Html5Qrcode("reader");
-            
-            await html5QrCode.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: 250 },
-                (decodedText) => {
-                    if (decodedText === "Lucky_session_Tracker") {
-                        handleCheckIn(email.toLowerCase());
-                        stopScanner();
-                    }
-                }
-            );
-        }
-
-        function stopScanner() {
-            if(html5QrCode) html5QrCode.stop();
-            document.getElementById('scanner-container').classList.add('hidden');
-        }
-
-        async function handleCheckIn(email) {
-            const { error } = await supabase.rpc('check_in_client', { target_email: email });
-            if (!error) {
-                alert("Check-in Successful!");
-                fetchBalance();
-            } else {
-                alert("Check-in failed. You might have 0 sessions left.");
-            }
-        }
-
-        // 4. PWA REGISTER
-        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js'); }
-    </script>
+    }
+</script>
 </body>
 </html>
