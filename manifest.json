@@ -1,19 +1,15 @@
 {
-  "name": "Parallel Pilates",
-  "short_name": "Parallel",
-  "description": "Lucky Session Tracker for Parallel Pilates Kemang",
+  "name": "Blueprint Mvmnt",
+  "short_name": "Blueprint",
+  "description": "The Blueprint of Movement - Session Tracker",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#2563eb",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "https://imgur.com/your-logo-link.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "https://imgur.com/your-logo-link.png",
+      "src": "/icon.png",
       "sizes": "512x512",
       "type": "image/png"
     }
