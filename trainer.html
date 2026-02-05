@@ -53,14 +53,23 @@
         <h2 class="text-2xl font-bold mb-6">Client Manager</h2>
 
         <div class="w-full max-w-md bg-gray-800/50 p-6 rounded-[2rem] border border-gray-700 backdrop-blur-md mb-6">
-            <label class="text-xs text-gray-400 font-bold uppercase ml-2">Search Client</label>
-            <input id="searchQuery" type="text" oninput="searchClient()" placeholder="Type Name or Email..." class="w-full mt-2 bg-gray-900 border border-gray-600 p-4 rounded-xl outline-none focus:border-blue-500 text-white transition-all">
+            
+            <label class="text-xs text-gray-400 font-bold uppercase ml-2">Find Existing</label>
+            <input id="searchQuery" type="text" oninput="searchClient()" placeholder="Type Name..." class="w-full mt-2 bg-gray-900 border border-gray-600 p-4 rounded-xl outline-none focus:border-blue-500 text-white transition-all mb-4">
+            
+            <div class="flex items-center justify-center my-2">
+                <span class="text-gray-600 text-xs uppercase font-bold">- OR -</span>
+            </div>
+
+            <button onclick="openAddMode()" class="w-full bg-green-600 hover:bg-green-500 py-3 rounded-xl font-bold text-sm shadow-lg uppercase tracking-wider">
+                + Add New Client
+            </button>
         </div>
 
-        <div id="edit-form" class="hidden w-full max-w-md bg-gray-800 p-6 rounded-[2rem] border border-gray-700 shadow-2xl">
+        <div id="edit-form" class="hidden w-full max-w-md bg-gray-800 p-6 rounded-[2rem] border border-gray-700 shadow-2xl pb-24">
             <div class="flex justify-between items-center mb-6 border-b border-gray-700 pb-4">
                 <div>
-                    <p class="text-xs text-blue-400 font-bold uppercase">Active Client</p>
+                    <p id="modeLabel" class="text-xs text-blue-400 font-bold uppercase">Editing</p>
                     <h3 id="displayName" class="text-xl font-bold text-white">--</h3>
                 </div>
                 <div class="text-right">
@@ -71,13 +80,18 @@
 
             <div class="space-y-4">
                 <div>
+                    <label class="text-xs text-gray-500 ml-2">Email Address</label>
+                    <input id="editEmail" type="email" placeholder="client@example.com" class="w-full bg-gray-900 p-3 rounded-xl border border-gray-700 outline-none focus:border-blue-500 text-white">
+                </div>
+
+                <div>
                     <label class="text-xs text-gray-500 ml-2">Client Name</label>
-                    <input id="newName" type="text" class="w-full bg-gray-900 p-3 rounded-xl border border-gray-700 outline-none focus:border-blue-500 text-white">
+                    <input id="newName" type="text" placeholder="e.g. Sarah" class="w-full bg-gray-900 p-3 rounded-xl border border-gray-700 outline-none focus:border-blue-500 text-white">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="text-xs text-gray-500 ml-2">Total Sessions</label>
-                        <input id="newTotal" type="number" class="w-full bg-gray-900 p-3 rounded-xl border border-gray-700 outline-none focus:border-blue-500 text-white">
+                        <input id="newTotal" type="number" placeholder="10" class="w-full bg-gray-900 p-3 rounded-xl border border-gray-700 outline-none focus:border-blue-500 text-white">
                     </div>
                     <div>
                         <label class="text-xs text-gray-500 ml-2">Expiry Date</label>
@@ -85,21 +99,23 @@
                     </div>
                 </div>
 
-                <button onclick="saveClient()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold shadow-lg mt-2">SAVE CHANGES</button>
-                <button onclick="resetUsage()" class="w-full border border-red-500/50 text-red-400 hover:bg-red-500/10 py-3 rounded-xl font-bold text-sm">RESET SCANS TO 0</button>
+                <button onclick="saveClient()" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold shadow-lg mt-2">SAVE CLIENT</button>
+                
+                <button id="resetBtn" onclick="resetUsage()" class="hidden w-full border border-red-500/50 text-red-400 hover:bg-red-500/10 py-3 rounded-xl font-bold text-sm">RESET SCANS TO 0</button>
             </div>
         </div>
     </div>
 
     <script>
         const supabaseUrl = 'https://umgeykseoqfwrkuttnxm.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZ2V5a3Nlb3Fmd3JrdXR0bnhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NDI3NTYsImV4cCI6MjA4NTUxODc1Nn0.vUDnlgdARv7v0wq98qS1dXTbPKtXfCy0EZy7wfP3hCk'; // <--- PASTE KEY HERE
+        const supabaseKey = 'YOUR_ACTUAL_ANON_KEY_HERE'; // <--- PASTE KEY HERE
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
         
-        let activeClientEmail = null;
+        // This tracks if we are editing an existing person or adding new
+        let isEditMode = false;
 
         function checkPin() {
-            if (document.getElementById('pinInput').value === '7850') {
+            if (document.getElementById('pinInput').value === '1234') {
                 showSection('hub-view');
                 new QRCode(document.getElementById("qrcode"), { text: "Lucky_session_Tracker", width: 250, height: 250 });
             } else { alert("Incorrect PIN"); }
@@ -110,51 +126,101 @@
             document.getElementById(sectionId).classList.remove('hidden');
         }
 
+        // --- NEW: Function to open form for ADDING ---
+        function openAddMode() {
+            isEditMode = false;
+            document.getElementById('edit-form').classList.remove('hidden');
+            
+            // Clear all fields
+            document.getElementById('editEmail').value = "";
+            document.getElementById('editEmail').disabled = false; // Enable email for typing
+            document.getElementById('editEmail').classList.remove('text-gray-500'); // Make it look active
+            
+            document.getElementById('newName').value = "";
+            document.getElementById('newTotal').value = "";
+            document.getElementById('newExpiry').value = "";
+            
+            // Update UI Labels
+            document.getElementById('modeLabel').innerText = "ADDING NEW";
+            document.getElementById('modeLabel').className = "text-xs text-green-400 font-bold uppercase";
+            document.getElementById('displayName').innerText = "New Client";
+            document.getElementById('currentBalance').innerText = "-";
+            document.getElementById('resetBtn').classList.add('hidden'); // Hide reset button
+        }
+
+        // --- UPDATED: Search Function ---
         async function searchClient() {
             const query = document.getElementById('searchQuery').value.toLowerCase().trim();
             const form = document.getElementById('edit-form');
-            if (query.length < 2) { form.classList.add('hidden'); return; }
+            
+            // If search is empty, hide form
+            if (query.length < 2) { 
+                form.classList.add('hidden'); 
+                return; 
+            }
 
             const { data } = await _supabase.from('client_profiles')
                 .select('*').or(`email.ilike.%${query}%,client_name.ilike.%${query}%`).limit(1).single();
 
             if (data) {
-                activeClientEmail = data.email;
+                isEditMode = true;
                 form.classList.remove('hidden');
-                document.getElementById('displayName').innerText = data.client_name || data.email;
-                document.getElementById('currentBalance').innerText = data.total_sessions - data.sessions_used;
+                
+                // Fill data
+                document.getElementById('editEmail').value = data.email;
+                document.getElementById('editEmail').disabled = true; // Lock email so you don't change ID
+                document.getElementById('editEmail').classList.add('text-gray-500'); // Make it look locked
+                
                 document.getElementById('newName').value = data.client_name || "";
                 document.getElementById('newTotal').value = data.total_sessions;
-                // Load the saved date if it exists
-                document.getElementById('newExpiry').value = data.expiry_date || ""; 
+                document.getElementById('newExpiry').value = data.expiry_date || "";
+                
+                document.getElementById('displayName').innerText = data.client_name || data.email;
+                document.getElementById('currentBalance').innerText = data.total_sessions - data.sessions_used;
+                
+                document.getElementById('modeLabel').innerText = "EDITING";
+                document.getElementById('modeLabel').className = "text-xs text-blue-400 font-bold uppercase";
+                document.getElementById('resetBtn').classList.remove('hidden');
             }
         }
 
+        // --- UPDATED: Save Function ---
         async function saveClient() {
-            const searchInput = document.getElementById('searchQuery').value.toLowerCase().trim();
-            const emailToUse = activeClientEmail || searchInput; 
+            const email = document.getElementById('editEmail').value.toLowerCase().trim();
             const name = document.getElementById('newName').value;
             const total = parseInt(document.getElementById('newTotal').value);
-            const expiry = document.getElementById('newExpiry').value; // Get the date
+            const expiry = document.getElementById('newExpiry').value;
 
-            if (!emailToUse || !total) return alert("Please fill in email and sessions");
+            if (!email || !total) return alert("Please fill in Email and Total Sessions");
 
+            // Save to database
             const { error } = await _supabase.from('client_profiles').upsert({ 
-                email: emailToUse, 
+                email: email, 
                 client_name: name, 
                 total_sessions: total,
-                expiry_date: expiry ? expiry : null // Save the date
+                expiry_date: expiry ? expiry : null
             }, { onConflict: 'email' });
 
-            if (!error) { alert("Saved Successfully!"); searchClient(); } 
-            else { alert("Error saving: " + error.message); }
+            if (!error) { 
+                alert("Saved Successfully!"); 
+                // Clear the form
+                document.getElementById('edit-form').classList.add('hidden');
+                document.getElementById('searchQuery').value = "";
+            } else { 
+                alert("Error saving: " + error.message); 
+            }
         }
 
         async function resetUsage() {
-            if (!activeClientEmail) return;
+            const email = document.getElementById('editEmail').value;
+            if (!email) return;
             if (confirm("Reset their 'used' sessions to 0?")) {
-                const { error } = await _supabase.from('client_profiles').update({ sessions_used: 0 }).eq('email', activeClientEmail);
-                if (!error) { alert("Reset Complete."); searchClient(); }
+                const { error } = await _supabase.from('client_profiles').update({ sessions_used: 0 }).eq('email', email);
+                if (!error) { 
+                    alert("Reset Complete."); 
+                    // Refresh the view
+                    document.getElementById('currentBalance').innerText = document.getElementById('newTotal').value; 
+                }
             }
         }
     </script>
