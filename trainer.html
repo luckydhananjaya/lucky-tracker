@@ -108,14 +108,14 @@
 
     <script>
         const supabaseUrl = 'https://umgeykseoqfwrkuttnxm.supabase.co';
-        const supabaseKey = 'YOUR_ACTUAL_ANON_KEY_HERE'; // <--- PASTE KEY HERE
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZ2V5a3Nlb3Fmd3JrdXR0bnhtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5NDI3NTYsImV4cCI6MjA4NTUxODc1Nn0.vUDnlgdARv7v0wq98qS1dXTbPKtXfCy0EZy7wfP3hCk'; // <--- PASTE KEY HERE
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
         
         // This tracks if we are editing an existing person or adding new
         let isEditMode = false;
 
         function checkPin() {
-            if (document.getElementById('pinInput').value === '1234') {
+            if (document.getElementById('pinInput').value === '7850') {
                 showSection('hub-view');
                 new QRCode(document.getElementById("qrcode"), { text: "Lucky_session_Tracker", width: 250, height: 250 });
             } else { alert("Incorrect PIN"); }
